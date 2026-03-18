@@ -1,0 +1,85 @@
+# Build output
+bin/
+obj/
+
+# Visual Studio temporary files, build results, and
+# user-specific files
+.vs/
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+
+# Auto-generated files
+*.DotSettings.user
+
+# Rider
+.idea/
+
+# NuGet packages
+*.nupkg
+# The packages folder can be ignored because of Package Restore
+**/packages/*
+# except build/, which is used as an MSBuild target.
+!**/packages/build/
+# Uncomment if necessary however generally it will be regenerated when needed
+#**/packages/repositories.config
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# Web publish folder
+_publish_
+
+# IIS Express
+/.vs/**/applicationhost.config
+/.vs/**/https*
+/.vs/**/IISExpress
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Mono Auto Generated Files
+mono_crash.*
+
+# Microsoft Azure Web App publish settings
+# (includes settings file for Web Deploy, etc.)
+*.Publish.xml
+
+# Visual Studio Code settings
+.vscode/
+
+# JetBrains Rider
+.idea/
+
+# DotCover
+*.dotCover
+
+# NCrunch
+*.ncrunch*
+
+# Resharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+
+# Microsoft Fakes
+FakesAssemblies/
+
+# Build results
+build/
+
+# SQL Server files
+*.mdf
+*.ldf
+
+# Windows image file caches
+Thumbs.db
+
+# Folder config file
+Desktop.ini
+
+# End of https://www.toptal.com/developers/gitignore/api/dotnet

@@ -1,0 +1,62 @@
+services:
+  my-nest-api:
+    container_name: my-nest-api
+    build:
+      context: ./my-nest-api      
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    networks:
+      - network-monitorizacion
+    volumes:
+      - logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+  my-dotnet-api:
+    build:
+      context: ./my-dotnet-api
+      dockerfile: ./WebApplication2/Dockerfile
+      args:
+        BUILD_CONFIGURATION: Release
+    image: my-dotnet-api:latest
+    container_name: my-dotnet-api
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_HTTP_PORTS=8080
+    networks:
+      - network-monitorizacion
+    volumes:
+      - logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+  traffic-generator:
+    build: ./traffic-generator
+    container_name: traffic-generator
+    environment:
+      - NEST_API_URL=http://my-nest-api:3000
+      - DOTNET_API_URL=http://my-dotnet-api:8080
+    depends_on:
+      my-nest-api:
+        condition: service_healthy
+      my-dotnet-api:
+        condition: service_healthy
+    networks:
+      - network-monitorizacion
+
+networks:
+  network-monitorizacion:
+
+volumes:
+  logs:

@@ -1,0 +1,15 @@
+version: "3.8"
+
+services:
+  my-dotnet-api:
+    build:
+      context: .
+      dockerfile: WebApplication2/Dockerfile
+      args:
+        BUILD_CONFIGURATION: Release
+    image: my-dotnet-api:latest
+    container_name: my-dotnet-api
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
