@@ -21,3 +21,6 @@ Es un API con NestJs que incluye:
 # traffic-generator
 Es un script en JS que lanza llamadas a los POST y GET de los controladores de los dos apis con una cadencia entre 1s y 2s.
 El objetivo es recibir llamadas en los APIs para ir generando log.
+
+
+<img width="793" height="457" alt="image" src="https://github.com/user-attachments/assets/0b5099a3-df8b-49c7-a0f6-cf09bd0ed8c2" />
