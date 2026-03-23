@@ -7,6 +7,22 @@ WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
+# PYROSCOPE
+# 1. Binarios nativos 
+COPY --from=pyroscope/pyroscope-dotnet:0.14.2-glibc /Pyroscope.Profiler.Native.so /app/Pyroscope.Profiler.Native.so
+COPY --from=pyroscope/pyroscope-dotnet:0.14.2-glibc /Pyroscope.Linux.ApiWrapper.x64.so /app/Pyroscope.Linux.ApiWrapper.x64.so
+
+# 2. Variables de entorno 
+ENV CORECLR_ENABLE_PROFILING=1
+ENV CORECLR_PROFILER={BD1A650D-AC5D-4896-B64F-D6FA25D6B26A}
+ENV CORECLR_PROFILER_PATH=/app/Pyroscope.Profiler.Native.so
+ENV LD_PRELOAD=/app/Pyroscope.Linux.ApiWrapper.x64.so
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/app
+
+# 3. Configuración de envío 
+ENV PYROSCOPE_APPLICATION_NAME=my-dotnet-api
+ENV PYROSCOPE_SERVER_ADDRESS=http://pyroscope:4040
+ENV PYROSCOPE_PROFILING_ENABLED=1
 
 # Esta fase se usa para compilar el proyecto de servicio
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build

@@ -25,4 +25,4 @@ COPY --from=builder /app/dist ./dist
 # Expose default Nest port
 EXPOSE 3000
 
-CMD ["node", "dist/main.js"]
+CMD ["node", "--require", "./dist/instrumentation.js", "dist/main.js"]

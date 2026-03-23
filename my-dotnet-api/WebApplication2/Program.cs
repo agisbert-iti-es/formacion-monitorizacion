@@ -3,9 +3,59 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using WebApplication2.Middleware;
-
+using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
+using Pyroscope;
 var builder = WebApplication.CreateBuilder(args);
 
+// ==========================================
+// CONFIGURACIÓN DE OPENTELEMETRY Y PYROSCOPE
+// ==========================================
+
+Pyroscope.Profiler.Instance.SetCPUTrackingEnabled(true);
+Pyroscope.Profiler.Instance.SetAllocationTrackingEnabled(true); // Memoria
+Pyroscope.Profiler.Instance.SetContentionTrackingEnabled(true); // Hilos bloqueados
+
+Pyroscope.LabelsWrapper.Do(labels, () => 
+{
+    Console.WriteLine("Pyroscope instrumentado correctamente desde el código.");
+});
+
+
+var resourceBuilder = ResourceBuilder.CreateDefault()
+    .AddService(builder.Environment.ApplicationName ?? "my-dotnet-api");
+
+// 1. Redirigir los Logs nativos de .NET (ILogger) a OpenTelemetry
+builder.Logging.AddOpenTelemetry(logging =>
+{
+    logging.IncludeFormattedMessage = true;
+    logging.IncludeScopes = true;
+    logging.SetResourceBuilder(resourceBuilder);
+    logging.AddOtlpExporter();
+});
+
+// 2. Configurar Trazas y Métricas
+builder.Services.AddOpenTelemetry()
+    .WithTracing(tracing =>
+    {
+        tracing.SetResourceBuilder(resourceBuilder)
+               .AddAspNetCoreInstrumentation() // Captura peticiones HTTP entrantes
+               .AddHttpClientInstrumentation() // Captura peticiones HTTP salientes
+               .AddEntityFrameworkCoreInstrumentation() // Captura las queries SQL a SQLite
+               .AddOtlpExporter();
+    })
+    .WithMetrics(metrics =>
+    {
+        metrics.SetResourceBuilder(resourceBuilder)
+               .AddAspNetCoreInstrumentation()
+               .AddHttpClientInstrumentation()
+               .AddRuntimeInstrumentation() // CPU, Memoria, Garbage Collector
+               .AddOtlpExporter();
+    });
+
+    
 // Add services to the container.
 
 builder.Services.AddControllers();
