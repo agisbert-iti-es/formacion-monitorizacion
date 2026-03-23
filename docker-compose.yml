@@ -1,39 +1,24 @@
 services:
-  my-nest-api:
-    container_name: my-nest-api
-    build:
-      context: ./my-nest-api      
-    ports:
-      - "3000:3000"
-    restart: unless-stopped
-    networks:
-      - network-monitorizacion
-    volumes:
-      - logs:/app/logs
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 40s
-
+  # ==========================================
+  # 1. APLICACIONES DE NEGOCIO
+  # ==========================================
   my-dotnet-api:
+    container_name: my-dotnet-api
     build:
       context: ./my-dotnet-api
       dockerfile: ./WebApplication2/Dockerfile
       args:
         BUILD_CONFIGURATION: Release
-    image: my-dotnet-api:latest
-    container_name: my-dotnet-api
     ports:
       - "8080:8080"
+    networks:
+      - network-monitorizacion
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_HTTP_PORTS=8080
-    networks:
-      - network-monitorizacion
-    volumes:
-      - logs:/app/logs
+      - OTEL_SERVICE_NAME=my-dotnet-api
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+      - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 30s
@@ -42,21 +27,93 @@ services:
       start_period: 40s
 
   traffic-generator:
-    build: ./traffic-generator
     container_name: traffic-generator
-    environment:
-      - NEST_API_URL=http://my-nest-api:3000
-      - DOTNET_API_URL=http://my-dotnet-api:8080
-    depends_on:
-      my-nest-api:
-        condition: service_healthy
-      my-dotnet-api:
-        condition: service_healthy
+    build: ./traffic-generator
     networks:
       - network-monitorizacion
+    environment:
+      - DOTNET_API_URL=http://my-dotnet-api:8080
+    depends_on:
+      my-dotnet-api:
+        condition: service_healthy
+
+  # ==========================================
+  # 2. ENRUTADOR CENTRAL (OpenTelemetry)
+  # ==========================================
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: otel-collector
+    networks:
+      - network-monitorizacion
+    ports:
+      - "4317:4317" # OTLP gRPC receiver 
+      - "4318:4318" # OTLP HTTP receiver 
+    volumes:
+      - ./otel-config.yaml:/etc/otelcol-contrib/config.yaml
+    depends_on:
+      - prometheus
+      - loki
+      - tempo
+
+  # ==========================================
+  # 3. BASES DE DATOS DE TELEMETRÍA
+  # ==========================================
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    networks:
+      - network-monitorizacion
+    volumes:
+      - ./prometheus.yaml:/etc/prometheus/prometheus.yml
+    command: 
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--web.enable-remote-write-receiver"
+
+  loki:
+    image: grafana/loki:latest
+    container_name: loki
+    networks:
+      - network-monitorizacion
+    volumes:
+      - ./loki.yaml:/etc/loki/local-config.yaml
+    command: 
+      - "-config.file=/etc/loki/local-config.yaml"
+
+  tempo:
+    image: grafana/tempo:2.6.0 
+    container_name: tempo
+    networks:
+      - network-monitorizacion
+    command: 
+      - "-config.file=/etc/tempo.yaml"
+    volumes:
+      - ./tempo.yaml:/etc/tempo.yaml
+
+  pyroscope:
+    image: grafana/pyroscope:latest
+    container_name: pyroscope
+    networks:
+      - network-monitorizacion
+    ports:
+      - "4040:4040"
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    networks:
+      - network-monitorizacion
+    ports:
+      - "3001:3000" 
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+    volumes:
+      - ./datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
+    depends_on:
+      - prometheus
+      - loki
+      - tempo
 
 networks:
   network-monitorizacion:
-
-volumes:
-  logs:
+    driver: bridge

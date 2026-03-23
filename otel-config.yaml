@@ -1,0 +1,54 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+
+processors:
+  batch:
+
+  # 1. Transformar atributos OTel a etiquetas estándar de Prometheus/Loki
+  resource:
+    attributes:
+      # Copia 'service.name' a una etiqueta 'job' (estándar de Prometheus)
+      - action: insert
+        from_attribute: service.name
+        key: job
+      # Copia 'service.name' a 'service_name' (para búsquedas fáciles en Loki)
+      - action: insert
+        from_attribute: service.name
+        key: service_name
+
+exporters:
+  prometheusremotewrite:
+    endpoint: "http://prometheus:9090/api/v1/write"
+    tls:
+      insecure: true
+    # 2. Obligar a Prometheus a usar el atributo 'job' como etiqueta indexada
+    target_info:
+      enabled: true
+  
+  otlphttp/loki:
+    endpoint: "http://loki:3100/otlp"
+    tls:
+      insecure: true
+  
+  otlp/tempo:
+    endpoint: "tempo:4317"
+    tls:
+      insecure: true
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [resource, batch] # Añadir 'resource' a todos los pipelines
+      exporters: [otlp/tempo]
+    metrics:
+      receivers: [otlp]
+      processors: [resource, batch]
+      exporters: [prometheusremotewrite]
+    logs:
+      receivers: [otlp]
+      processors: [resource, batch]
+      exporters: [otlphttp/loki]
