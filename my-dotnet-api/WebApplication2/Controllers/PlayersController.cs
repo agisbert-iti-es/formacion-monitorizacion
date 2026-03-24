@@ -29,11 +29,15 @@ public class PlayersController : ControllerBase
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> PostPlayer([FromBody] PlayerDto dto)
     {
-        // Simular fallo aleatorio: aproximadamente 1 de cada 4 llamadas
-        var random = new Random();
-        if (random.Next(1, 5) == 1)
+        // Simular fallo cuando el segundo actual es impar
+        if (DateTime.Now.Second % 2 != 0)
         {
-            throw new Exception("Simulated random failure for testing purposes.");
+            var text = $"Simulated failure at {DateTime.Now:HH:mm:ss}";
+            Console.Error.WriteLine($"Usando Console.Error.WriteLine: {text}");
+            Console.WriteLine($"Usando Console.WriteLine: {text}");
+            
+
+            return StatusCode(500, text);
         }
 
         var exists = await _db.Players.AnyAsync(p => p.Id == dto.Id);

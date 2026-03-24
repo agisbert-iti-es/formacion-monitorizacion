@@ -13,6 +13,7 @@ datasources:
     type: tempo
     url: http://tempo:3200
     access: proxy
+    editable: true
   - name: Pyroscope
     type: grafana-pyroscope-datasource
     url: http://pyroscope:4040

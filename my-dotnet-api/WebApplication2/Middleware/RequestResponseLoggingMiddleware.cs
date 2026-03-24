@@ -56,6 +56,7 @@ public class RequestResponseLoggingMiddleware
             var logEntry = new
             {
                 timestampUtc = utcNow.ToString("o"),
+                traceId = Activity.Current?.TraceId.ToString(),
                 method = context.Request.Method,
                 url = context.Request.Path + context.Request.QueryString,
                 requestBody = string.IsNullOrEmpty(requestBody) ? null : requestBody,
