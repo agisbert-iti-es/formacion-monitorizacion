@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using WebApplication2.Data;
 using WebApplication2.Models;
 using Microsoft.AspNetCore.Http;
+using System;
 
 namespace WebApplication2.Controllers;
 
@@ -28,6 +29,13 @@ public class PlayersController : ControllerBase
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> PostPlayer([FromBody] PlayerDto dto)
     {
+        // Simular fallo aleatorio: aproximadamente 1 de cada 4 llamadas
+        var random = new Random();
+        if (random.Next(1, 5) == 1)
+        {
+            throw new Exception("Simulated random failure for testing purposes.");
+        }
+
         var exists = await _db.Players.AnyAsync(p => p.Id == dto.Id);
         if (exists) return Conflict($"Player with id {dto.Id} already exists.");
         var player = new Player { Id = dto.Id, Name = dto.Name };

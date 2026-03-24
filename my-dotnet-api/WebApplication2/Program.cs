@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,10 +19,7 @@ Pyroscope.Profiler.Instance.SetCPUTrackingEnabled(true);
 Pyroscope.Profiler.Instance.SetAllocationTrackingEnabled(true); // Memoria
 Pyroscope.Profiler.Instance.SetContentionTrackingEnabled(true); // Hilos bloqueados
 
-Pyroscope.LabelsWrapper.Do(labels, () => 
-{
-    Console.WriteLine("Pyroscope instrumentado correctamente desde el código.");
-});
+Console.WriteLine("Pyroscope instrumentado correctamente desde el código.");
 
 
 var resourceBuilder = ResourceBuilder.CreateDefault()
