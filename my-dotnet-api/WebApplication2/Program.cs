@@ -67,6 +67,10 @@ builder.Services.AddSwaggerGen(c =>
 // Health checks
 builder.Services.AddHealthChecks();
 
+// Register services
+builder.Services.AddScoped<WebApplication2.Repositories.IPlayerRepository, WebApplication2.Repositories.PlayerRepository>();
+builder.Services.AddScoped<WebApplication2.Services.IPlayerService, WebApplication2.Services.PlayerService>();
+
 // Configure DbContext for SQLite
 builder.Services.AddDbContext<WebApplication2.Data.AppDbContext>(options =>
     options.UseSqlite("Data Source=players.db"));
