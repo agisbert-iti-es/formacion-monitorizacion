@@ -1,10 +1,8 @@
 using Microsoft.EntityFrameworkCore;
-using WebApplication2.Data;
-using WebApplication2.Models;
-using System;
-using System.Threading.Tasks;
+using MyDotNetApi.Data;
+using MyDotNetApi.Models;
 
-namespace WebApplication2.Repositories;
+namespace MyDotNetApi.Repositories;
 
 public class PlayerRepository : IPlayerRepository
 {

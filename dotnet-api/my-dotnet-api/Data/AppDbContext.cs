@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using WebApplication2.Models;
+using MyDotNetApi.Models;
 
-namespace WebApplication2.Data;
+namespace MyDotNetApi.Data;
 
 public class AppDbContext : DbContext
 {

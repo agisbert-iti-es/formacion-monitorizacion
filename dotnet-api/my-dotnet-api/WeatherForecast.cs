@@ -1,4 +1,4 @@
-namespace WebApplication2
+namespace MyDotNetApi
 {
     public class WeatherForecast
     {

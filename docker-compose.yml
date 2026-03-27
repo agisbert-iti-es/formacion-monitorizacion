@@ -25,8 +25,8 @@ services:
   my-dotnet-api:
     container_name: my-dotnet-api
     build:
-      context: ./my-dotnet-api
-      dockerfile: ./WebApplication2/Dockerfile
+      context: ./dotnet-api
+      dockerfile: ./my-dotnet-api/Dockerfile
       args:
         BUILD_CONFIGURATION: Release
     ports:

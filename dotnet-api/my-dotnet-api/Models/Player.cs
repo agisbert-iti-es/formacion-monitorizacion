@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace WebApplication2.Models;
+namespace MyDotNetApi.Models;
 
 public class Player
 {

@@ -1,14 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
+
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using WebApplication2.Middleware;
+using MyDotNetApi.Middleware;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using Pyroscope;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // ==========================================
@@ -67,17 +64,17 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     // Register schema filter to add example JSON for models
-    c.SchemaFilter<WebApplication2.Swagger.SchemaExamples>();
+    c.SchemaFilter<MyDotNetApi.Swagger.SchemaExamples>();
 });
 // Health checks
 builder.Services.AddHealthChecks();
 
 // Register services
-builder.Services.AddScoped<WebApplication2.Repositories.IPlayerRepository, WebApplication2.Repositories.PlayerRepository>();
-builder.Services.AddScoped<WebApplication2.Services.IPlayerService, WebApplication2.Services.PlayerService>();
+builder.Services.AddScoped<MyDotNetApi.Repositories.IPlayerRepository, MyDotNetApi.Repositories.PlayerRepository>();
+builder.Services.AddScoped<MyDotNetApi.Services.IPlayerService, MyDotNetApi.Services.PlayerService>();
 
 // Configure DbContext for SQLite
-builder.Services.AddDbContext<WebApplication2.Data.AppDbContext>(options =>
+builder.Services.AddDbContext<MyDotNetApi.Data.AppDbContext>(options =>
     options.UseSqlite("Data Source=players.db"));
 
 var app = builder.Build();
@@ -85,7 +82,7 @@ var app = builder.Build();
 // Ensure database is created
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<WebApplication2.Data.AppDbContext>();
+    var db = scope.ServiceProvider.GetRequiredService<MyDotNetApi.Data.AppDbContext>();
     db.Database.EnsureCreated();
 }
 
@@ -94,7 +91,7 @@ using (var scope = app.Services.CreateScope())
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "WebApplication2 API V1");
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "my_dotnet_api API V1");
     c.RoutePrefix = string.Empty; // serve Swagger UI at '/'
 });
 
@@ -109,7 +106,7 @@ if (enableHttpsRedirect)
 app.UseAuthorization();
 
 // Global exception handler middleware
-app.UseMiddleware<WebApplication2.Middleware.GlobalExceptionHandler>();
+app.UseMiddleware<MyDotNetApi.Middleware.GlobalExceptionHandler>();
 
 // Request/Response logging middleware
 app.UseMiddleware<RequestResponseLoggingMiddleware>();

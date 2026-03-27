@@ -1,9 +1,8 @@
 using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
-using Microsoft.AspNetCore.Http;
 
-namespace WebApplication2.Middleware;
+namespace MyDotNetApi.Middleware;
 
 public class RequestResponseLoggingMiddleware
 {

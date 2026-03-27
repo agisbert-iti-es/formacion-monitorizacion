@@ -1,4 +1,4 @@
-namespace WebApplication2.Models;
+namespace MyDotNetApi.Models;
 
 public class PlayerDto
 {

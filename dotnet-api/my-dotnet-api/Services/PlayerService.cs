@@ -1,10 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using WebApplication2.Models;
-using WebApplication2.Repositories;
-using System;
-using System.Threading.Tasks;
+using MyDotNetApi.Models;
+using MyDotNetApi.Repositories;
 
-namespace WebApplication2.Services;
+namespace MyDotNetApi.Services;
 
 public interface IPlayerService
 {

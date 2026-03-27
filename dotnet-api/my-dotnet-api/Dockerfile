@@ -28,16 +28,16 @@ ENV PYROSCOPE_PROFILING_ENABLED=1
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["WebApplication2/WebApplication2.csproj", "WebApplication2/"]
-RUN dotnet restore "./WebApplication2/WebApplication2.csproj"
+COPY ["my-dotnet-api/my-dotnet-api.csproj", "my-dotnet-api/"]
+RUN dotnet restore "./my-dotnet-api/my-dotnet-api.csproj"
 COPY . .
-WORKDIR "/src/WebApplication2"
-RUN dotnet build "./WebApplication2.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/src/my-dotnet-api"
+RUN dotnet build "./my-dotnet-api.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # Esta fase se usa para publicar el proyecto de servicio que se copiará en la fase final.
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./WebApplication2.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./my-dotnet-api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # Esta fase se usa en producción o cuando se ejecuta desde VS en modo normal (valor predeterminado cuando no se usa la configuración de depuración)
 FROM base AS final
@@ -46,4 +46,4 @@ RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 # USER $APP_UID
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "WebApplication2.dll"]
+ENTRYPOINT ["dotnet", "my-dotnet-api.dll"]

@@ -4,7 +4,7 @@ services:
   my-dotnet-api:
     build:
       context: .
-      dockerfile: WebApplication2/Dockerfile
+      dockerfile: my-dotnet-api/Dockerfile
       args:
         BUILD_CONFIGURATION: Release
     image: my-dotnet-api:latest

@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
-using WebApplication2.Models;
-using WebApplication2.Services;
+using MyDotNetApi.Models;
+using MyDotNetApi.Services;
 using System.Threading.Tasks;
 
-namespace WebApplication2.Controllers;
+namespace MyDotNetApi.Controllers;
 
 [ApiController]
 [Route("[controller]")]

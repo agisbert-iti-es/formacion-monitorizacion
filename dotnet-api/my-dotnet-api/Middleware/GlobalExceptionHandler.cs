@@ -3,7 +3,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
-namespace WebApplication2.Middleware;
+namespace MyDotNetApi.Middleware;
 
 public class GlobalExceptionHandler
 {

@@ -3,7 +3,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using System.Linq;
 using Microsoft.AspNetCore.Http;
 
-namespace WebApplication2.Controllers;
+namespace MyDotNetApi.Controllers;
 
 [ApiController]
 [Route("health")]

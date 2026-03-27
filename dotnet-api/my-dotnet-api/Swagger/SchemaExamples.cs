@@ -1,9 +1,10 @@
+
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
+using MyDotNetApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
-using WebApplication2.Models;
 
-namespace WebApplication2.Swagger;
+namespace MyDotNetApi.Swagger;
 
 public class SchemaExamples : ISchemaFilter
 {
