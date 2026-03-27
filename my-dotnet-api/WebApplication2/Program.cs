@@ -39,6 +39,11 @@ builder.Services.AddOpenTelemetry()
     .WithTracing(tracing =>
     {
         tracing.SetResourceBuilder(resourceBuilder)
+                .AddAspNetCoreInstrumentation(options =>
+                {
+                    // ESTO ES CLAVE: Registra el objeto de excepción completo
+                    options.RecordException = true; 
+                })
                .AddAspNetCoreInstrumentation() // Captura peticiones HTTP entrantes
                .AddHttpClientInstrumentation() // Captura peticiones HTTP salientes
                .AddEntityFrameworkCoreInstrumentation() // Captura las queries SQL a SQLite

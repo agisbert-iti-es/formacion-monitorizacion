@@ -39,7 +39,14 @@ public class PlayerService : IPlayerService
             
             int httpStatusCode = DateTime.Now.Second % 2 != 0 ? 500 : 400;
 
-            return new StatusCodeResult(httpStatusCode);
+            if (httpStatusCode == 500)
+            {
+                throw new Exception(text); // Esto se capturará como una excepción en OpenTelemetry
+            }
+            else
+            {
+                return new BadRequestObjectResult(text); // Esto se registrará como un error HTTP en OpenTelemetry
+            }            
         }
 
         var player = new Player { Id = dto.Id, Name = dto.Name };
