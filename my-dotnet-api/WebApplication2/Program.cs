@@ -108,6 +108,9 @@ if (enableHttpsRedirect)
 
 app.UseAuthorization();
 
+// Global exception handler middleware
+app.UseMiddleware<WebApplication2.Middleware.GlobalExceptionHandler>();
+
 // Request/Response logging middleware
 app.UseMiddleware<RequestResponseLoggingMiddleware>();
 
