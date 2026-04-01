@@ -5,57 +5,14 @@ using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using Pyroscope;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ==========================================
-// CONFIGURACIÓN DE OPENTELEMETRY Y PYROSCOPE
-// ==========================================
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
-Pyroscope.Profiler.Instance.SetCPUTrackingEnabled(true);
-Pyroscope.Profiler.Instance.SetAllocationTrackingEnabled(true); // Memoria
-Pyroscope.Profiler.Instance.SetContentionTrackingEnabled(true); // Hilos bloqueados
+ConfigureOpenTelemetry(builder);
 
-Console.WriteLine("Pyroscope instrumentado correctamente desde el código.");
-
-
-var resourceBuilder = ResourceBuilder.CreateDefault()
-    .AddService(builder.Environment.ApplicationName ?? "my-dotnet-api");
-
-// 1. Redirigir los Logs nativos de .NET (ILogger) a OpenTelemetry
-builder.Logging.AddOpenTelemetry(logging =>
-{
-    logging.IncludeFormattedMessage = true;
-    logging.IncludeScopes = true;
-    logging.SetResourceBuilder(resourceBuilder);
-    logging.AddOtlpExporter();
-});
-
-// 2. Configurar Trazas y Métricas
-builder.Services.AddOpenTelemetry()
-    .WithTracing(tracing =>
-    {
-        tracing.SetResourceBuilder(resourceBuilder)
-                .AddAspNetCoreInstrumentation(options =>
-                {
-                    // ESTO ES CLAVE: Registra el objeto de excepción completo
-                    options.RecordException = true; 
-                })
-               .AddAspNetCoreInstrumentation() // Captura peticiones HTTP entrantes
-               .AddHttpClientInstrumentation() // Captura peticiones HTTP salientes
-               .AddEntityFrameworkCoreInstrumentation() // Captura las queries SQL a SQLite
-               .AddOtlpExporter();
-    })
-    .WithMetrics(metrics =>
-    {
-        metrics.SetResourceBuilder(resourceBuilder)
-               .AddAspNetCoreInstrumentation()
-               .AddHttpClientInstrumentation()
-               .AddRuntimeInstrumentation() // CPU, Memoria, Garbage Collector
-               .AddOtlpExporter();
-    });
-
-    
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -68,6 +25,8 @@ builder.Services.AddSwaggerGen(c =>
 });
 // Health checks
 builder.Services.AddHealthChecks();
+
+builder.Services.AddProblemDetails();
 
 // Register services
 builder.Services.AddScoped<MyDotNetApi.Repositories.IPlayerRepository, MyDotNetApi.Repositories.PlayerRepository>();
@@ -105,12 +64,65 @@ if (enableHttpsRedirect)
 
 app.UseAuthorization();
 
+
 // Global exception handler middleware
-app.UseMiddleware<MyDotNetApi.Middleware.GlobalExceptionHandler>();
+//app.UseMiddleware<GlobalExceptionHandler>();
 
 // Request/Response logging middleware
 app.UseMiddleware<RequestResponseLoggingMiddleware>();
 
+app.UseExceptionHandler();
+
 app.MapControllers();
 
 app.Run();
+
+static void ConfigureOpenTelemetry(WebApplicationBuilder builder)
+{
+    // ==========================================
+    // CONFIGURACIÓN DE OPENTELEMETRY Y PYROSCOPE
+    // ==========================================
+
+    Pyroscope.Profiler.Instance.SetCPUTrackingEnabled(true);
+    Pyroscope.Profiler.Instance.SetAllocationTrackingEnabled(true); // Memoria
+    Pyroscope.Profiler.Instance.SetContentionTrackingEnabled(true); // Hilos bloqueados
+
+    Console.WriteLine("Pyroscope instrumentado correctamente desde el código.");
+
+
+    var resourceBuilder = ResourceBuilder.CreateDefault()
+        .AddService(builder.Environment.ApplicationName ?? "my-dotnet-api");
+
+    // 1. Redirigir los Logs nativos de .NET (ILogger) a OpenTelemetry
+    builder.Logging.AddOpenTelemetry(logging =>
+    {
+        logging.IncludeFormattedMessage = true;
+        logging.IncludeScopes = true;
+        logging.SetResourceBuilder(resourceBuilder);
+        logging.AddOtlpExporter();
+    });
+
+    // 2. Configurar Trazas y Métricas
+    builder.Services.AddOpenTelemetry()
+        .WithTracing(tracing =>
+        {
+            tracing.SetResourceBuilder(resourceBuilder)
+                    .AddAspNetCoreInstrumentation(options =>
+                    {
+                        // ESTO ES CLAVE: Registra el objeto de excepción completo
+                        options.RecordException = true;
+                    })
+                   .AddAspNetCoreInstrumentation() // Captura peticiones HTTP entrantes
+                   .AddHttpClientInstrumentation() // Captura peticiones HTTP salientes
+                   .AddEntityFrameworkCoreInstrumentation() // Captura las queries SQL a SQLite
+                   .AddOtlpExporter();
+        })
+        .WithMetrics(metrics =>
+        {
+            metrics.SetResourceBuilder(resourceBuilder)
+                   .AddAspNetCoreInstrumentation()
+                   .AddHttpClientInstrumentation()
+                   .AddRuntimeInstrumentation() // CPU, Memoria, Garbage Collector
+                   .AddOtlpExporter();
+        });
+}

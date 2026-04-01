@@ -1,33 +1,14 @@
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Text.Json;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
 
 namespace MyDotNetApi.Middleware;
 
-public class GlobalExceptionHandler
-{
-    private readonly RequestDelegate _next;
-    private readonly ILogger<GlobalExceptionHandler> _logger;
-
-    public GlobalExceptionHandler(RequestDelegate next, ILogger<GlobalExceptionHandler> logger)
-    {
-        _next = next;
-        _logger = logger;
-    }
-
-    public async Task InvokeAsync(HttpContext context)
-    {
-        try
-        {
-            await _next(context);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "An unhandled exception occurred");
-            await HandleExceptionAsync(context, ex);
-        }
-    }
+public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IExceptionHandler
+{     
 
     private static async Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
@@ -68,6 +49,13 @@ public class GlobalExceptionHandler
 
         var jsonResponse = JsonSerializer.Serialize(responseModel);
         await response.WriteAsync(jsonResponse);
+    }
+
+    public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
+    {
+        logger.LogError("Something went wrong: {Exception}", exception.ToString());
+        await HandleExceptionAsync(httpContext, exception);
+        return true;
     }
 }
 
