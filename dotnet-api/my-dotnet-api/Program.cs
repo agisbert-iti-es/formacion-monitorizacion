@@ -1,6 +1,7 @@
 
 using Microsoft.EntityFrameworkCore;
 using MyDotNetApi.Middleware;
+using OpenTelemetry.Exporter;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -26,6 +27,9 @@ builder.Services.AddSwaggerGen(c =>
 // Health checks
 builder.Services.AddHealthChecks();
 
+// Add ProblemDetails middleware for standardized error responses in format json 
+// with fields like "type", "title", "status", "detail", and "instance"
+// Works with the GlobalExceptionHandler to return consistent error responses across the API
 builder.Services.AddProblemDetails();
 
 // Register services
@@ -64,10 +68,6 @@ if (enableHttpsRedirect)
 
 app.UseAuthorization();
 
-
-// Global exception handler middleware
-//app.UseMiddleware<GlobalExceptionHandler>();
-
 // Request/Response logging middleware
 app.UseMiddleware<RequestResponseLoggingMiddleware>();
 
@@ -99,7 +99,12 @@ static void ConfigureOpenTelemetry(WebApplicationBuilder builder)
         logging.IncludeFormattedMessage = true;
         logging.IncludeScopes = true;
         logging.SetResourceBuilder(resourceBuilder);
-        logging.AddOtlpExporter();
+        logging.AddOtlpExporter(options =>
+        {
+            // Esto asegura que se use el protocolo OTLP estándar 
+            // que la mayoría de backends (Tempo/Loki) interpretan como snake_case
+            options.Protocol = OtlpExportProtocol.Grpc;
+        });
     });
 
     // 2. Configurar Trazas y Métricas

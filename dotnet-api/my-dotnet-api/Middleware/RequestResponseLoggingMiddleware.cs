@@ -55,13 +55,13 @@ public class RequestResponseLoggingMiddleware
             var logEntry = new
             {
                 timestampUtc = utcNow.ToString("o"),
-                traceId = Activity.Current?.TraceId.ToString(),
+                trace_id = Activity.Current?.TraceId.ToString(),
                 method = context.Request.Method,
                 url = context.Request.Path + context.Request.QueryString,
-                requestBody = string.IsNullOrEmpty(requestBody) ? null : requestBody,
-                responseStatus = context.Response.StatusCode,
-                responseBody = string.IsNullOrEmpty(responseBodyText) ? null : responseBodyText,
-                elapsedMilliseconds = stopwatch.ElapsedMilliseconds
+                request_body = string.IsNullOrEmpty(requestBody) ? null : requestBody,
+                response_status = context.Response.StatusCode,
+                response_body = string.IsNullOrEmpty(responseBodyText) ? null : responseBodyText,
+                elapsed_milliseconds = stopwatch.ElapsedMilliseconds
             };
 
             try
