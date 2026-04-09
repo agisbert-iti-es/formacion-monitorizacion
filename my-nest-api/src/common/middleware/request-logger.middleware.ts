@@ -32,13 +32,13 @@ export class RequestLoggerMiddleware implements NestMiddleware {
       const durationMs = Number(process.hrtime.bigint() - startTime) / 1_000_000;
 
       const entry = {
-        timestamp,
+        timestampUtc: timestamp,
         method: req.method,
         url: req.originalUrl || req.url,
-        requestBody: req.body,
-        statusCode: res.statusCode,
-        responseBody,
-        durationMs,
+        request_body: req.body,
+        response_status: res.statusCode,
+        response_body,
+        elapsed_milliseconds: durationMs,
       };
 
       const line = JSON.stringify(entry) + '\n';

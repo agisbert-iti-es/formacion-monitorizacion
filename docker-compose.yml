@@ -83,6 +83,8 @@ services:
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
+    ports:
+      - "9090:9090"
     networks:
       - network-monitorizacion
     volumes:
@@ -127,6 +129,22 @@ services:
       - network-monitorizacion
     ports:
       - "4040:4040"
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    ports:
+      - "8081:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    devices:
+      - /dev/kmsg
+    networks:
+      - network-monitorizacion
 
   grafana:
     image: grafana/grafana:latest
