@@ -14,7 +14,7 @@ services:
     networks:
       - network-monitorizacion
     volumes:
-      - logs:/app/logs
+      - logs_dir_my_nest_api:/app/logs
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
       interval: 30s
@@ -106,7 +106,8 @@ services:
   promtail:
     image: "grafana/promtail:2.4.2"
     volumes:
-      - logs_dir_my_dotnet_api:/tmp/log/my-dotnet-api/  # Mapea el volumen de logs al contenedor de promtail
+      - logs_dir_my_dotnet_api:/tmp/log/my-dotnet-api/
+      - logs_dir_my_nest_api:/tmp/log/my-nest-api/
       - ./promtail.yml:/etc/promtail/config.yaml
     command: -config.file=/etc/promtail/config.yaml
     networks:
@@ -169,3 +170,4 @@ networks:
 
 volumes:
   logs_dir_my_dotnet_api:  # Volumen para los logs de my-dotnet
+  logs_dir_my_nest_api:  # Volumen para los logs de my-nest-api

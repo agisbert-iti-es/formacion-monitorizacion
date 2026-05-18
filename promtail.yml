@@ -9,3 +9,11 @@ scrape_configs:
         labels:
           job: my-dotnet-api
           __path__: /tmp/log/my-dotnet-api/*.log
+
+  - job_name: my-nest-api-logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: my-nest-api
+          __path__: /tmp/log/my-nest-api/*.log
