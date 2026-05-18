@@ -21,6 +21,11 @@ services:
       timeout: 10s
       retries: 5
       start_period: 40s
+    environment:
+      - OTEL_SERVICE_NAME=my-nest-api
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+      - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+      - PYROSCOPE_SERVER_ADDRESS=http://pyroscope:4040
 
   my-dotnet-api:
     container_name: my-dotnet-api
