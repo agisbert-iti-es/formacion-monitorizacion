@@ -37,7 +37,7 @@ export class RequestLoggerMiddleware implements NestMiddleware {
         url: req.originalUrl || req.url,
         request_body: req.body,
         response_status: res.statusCode,
-        response_body,
+        response_body: responseBody,
         elapsed_milliseconds: durationMs,
       };
 

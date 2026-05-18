@@ -12,16 +12,17 @@ import * as Pyroscope from '@pyroscope/nodejs';
 // 1. Pyroscope (Profiling)
 Pyroscope.init({
   serverAddress: process.env.PYROSCOPE_SERVER_ADDRESS || 'http://pyroscope:4040',
-  appName: 'frontend',
+  appName: 'my-nest-api',
 });
 Pyroscope.start();
 
 const OTLP_URL = process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://otel-collector:4317';
+const OTLP_SERVICE_NAME = process.env.OTEL_SERVICE_NAME || 'my-nest-api';
 
 // 2. OpenTelemetry SDK
 const sdk = new NodeSDK({
   resource: new Resource({
-    [ATTR_SERVICE_NAME]: 'frontend',
+    [ATTR_SERVICE_NAME]: OTLP_SERVICE_NAME,
   }),
   traceExporter: new OTLPTraceExporter({ url: OTLP_URL }),
   metricReader: new PeriodicExportingMetricReader({
